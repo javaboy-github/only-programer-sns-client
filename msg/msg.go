@@ -8,6 +8,7 @@ import (
 	"os"
     "net/http"
     "bytes"
+    "unicode/utf8"
 )
 
 func MsgCmd() *cobra.Command {
@@ -26,24 +27,25 @@ func sendMsg() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			var msg string
 			cmd.Println("メッセージを入力[二回連続で改行で送信][280B]")
-			var isEntered bool
 			var sc = bufio.NewScanner(os.Stdin)
+			// 二回連続で改行が入るまで繰り返す
 			for {
 				sc.Scan()
 				input := sc.Text()
-				if isEntered && input == "" {
+				if input == "" {
 					break
 				}
-				isEntered = input == ""
 				msg += input
 			}
 
-			if len(msg) > 280 {
+			// 280字以内でないと送信できない
+			if utf8.RuneCountInString(msg) > 280 {
 				color.Red("280Bを超えています！送信不可")
 				os.Exit(1)
 			} else {
 				fmt.Println("送信します")
-                req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte("{text:\"" + msg +"\"}")))
+				// メッセージを送信
+                req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte("{\"text\":\"" + msg +"\"}")))
                 req.Header.Set("Authorization", "HelloWorld")
                 client := &http.Client{}
                 resp, err := client.Do(req)
