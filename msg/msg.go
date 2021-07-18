@@ -44,7 +44,7 @@ func sendMsg() *cobra.Command {
 				if len(args) == 0{
 					data = fmt.Sprintf("{\"text\":\"%s\"}", msg)
 				} else {
-					data = fmt.Sprintf("{\"text\":\"%s\",\"in_reply_to_text_id\":\"%s\"}", msg)
+					data = fmt.Sprintf("{\"text\":\"%s\",\"in_reply_to_text_id\":\"%s\"}", msg, args[0])
 				}
                 req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte(data)))
                 req.Header.Set("Authorization", "HelloWorld")
