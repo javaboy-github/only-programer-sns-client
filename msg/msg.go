@@ -27,6 +27,7 @@ func sendMsg() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "send msg",
 		Short: "メセージを送信します。",
+		Long: "メッセージを送信します。第一引数にreply先のIDを入れることも可能です",
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Println("メッセージを入力[二回連続で改行で送信][280B]")
 			// テキストを取得
@@ -39,7 +40,13 @@ func sendMsg() *cobra.Command {
 			} else {
 				fmt.Println("送信します")
 				// メッセージを送信
-                req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte("{\"text\":\"" + msg +"\"}")))
+				var data string
+				if len(args) == 0{
+					data = fmt.Sprintf("{\"text\":\"%s\"}", msg)
+				} else {
+					data = fmt.Sprintf("{\"text\":\"%s\",\"in_reply_to_text_id\":\"%s\"}", msg)
+				}
+                req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte(data)))
                 req.Header.Set("Authorization", "HelloWorld")
                 client := &http.Client{}
                 resp, err := client.Do(req)
