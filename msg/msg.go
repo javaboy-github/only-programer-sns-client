@@ -2,13 +2,16 @@ package msg
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"unicode/utf8"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"os"
-    "net/http"
-    "bytes"
-    "unicode/utf8"
 )
 
 func MsgCmd() *cobra.Command {
@@ -17,6 +20,7 @@ func MsgCmd() *cobra.Command {
 		Short: "メッセージを送信/閲覧/返信します。",
 	}
 	cmd.AddCommand(sendMsg())
+	cmd.AddCommand(seeMsgsCmd())
 	return cmd
 }
 
@@ -55,6 +59,26 @@ func sendMsg() *cobra.Command {
                     fmt.Println("送信が完了しました！")
                 }
                 defer resp.Body.Close()
+			}
+		},
+	}
+	return cmd
+}
+
+func seeMsgsCmd()*cobra.Command  {
+	cmd := &cobra.Command{
+		Use: "list",
+		Short: "すべてのメッセージを表示します",
+		Run: func(cmd *cobra.Command, args []string) {
+			// メッセージ一覧を取得
+			resp, _ := http.Get("https://versatileapi.herokuapp.com/api/text/all")
+			defer resp.Body.Close()
+			body, _ := io.ReadAll(resp.Body)
+			var result []map[string]string;
+			json.Unmarshal([]byte(body), &result)
+			for _,e := range result {
+				fmt.Println(color.BlueString(e["id"]) + "[" + color.YellowString(e["_created_at"]) + "]")
+				fmt.Println(e["text"])
 			}
 		},
 	}
