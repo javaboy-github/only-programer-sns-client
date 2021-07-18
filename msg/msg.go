@@ -1,7 +1,6 @@
 package msg
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -9,9 +8,9 @@ import (
 	"net/http"
 	"os"
 	"unicode/utf8"
-
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/javaboy-github/only-programer-sns-client/util"
 )
 
 func MsgCmd() *cobra.Command {
@@ -29,18 +28,9 @@ func sendMsg() *cobra.Command {
 		Use:   "send msg",
 		Short: "メセージを送信します。",
 		Run: func(cmd *cobra.Command, args []string) {
-			var msg string
 			cmd.Println("メッセージを入力[二回連続で改行で送信][280B]")
-			var sc = bufio.NewScanner(os.Stdin)
-			// 二回連続で改行が入るまで繰り返す
-			for {
-				sc.Scan()
-				input := sc.Text()
-				if input == "" {
-					break
-				}
-				msg += input
-			}
+			// テキストを取得
+			msg := util.GetText()
 
 			// 280字以内でないと送信できない
 			if utf8.RuneCountInString(msg) > 280 {

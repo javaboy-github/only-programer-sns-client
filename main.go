@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/javaboy-github/only-programer-sns-client/msg"
+	"github.com/javaboy-github/only-programer-sns-client/user"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -25,4 +26,5 @@ func main() {
 func init() {
 	cobra.OnInitialize()
 	RootCmd.AddCommand(msg.MsgCmd())
+	RootCmd.AddCommand(user.UserCmd())
 }
