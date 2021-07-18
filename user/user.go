@@ -37,7 +37,8 @@ func createCmd() *cobra.Command {
 				color.Red("300字を超えています")
 				return
 			}
-			http.Post("https://versatileapi.herokuapp.com/api", "text/plain", strings.NewReader(fmt.Sprintf("{\"name\":\"%s\",\"description\":\"%s\"}", name, profile)))
+			resp, _ := http.Post("https://versatileapi.herokuapp.com/api/user/create_user", "text/plain", strings.NewReader(fmt.Sprintf("{\"name\":\"%s\",\"description\":\"%s\"}", name, profile)))
+			defer resp.Body.Close()
 			fmt.Println("完了しました")
 		},
 	}
