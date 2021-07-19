@@ -30,12 +30,14 @@ func createCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("ユーザー名を入力[二回改行で決定][30字]")
 			name := util.GetText()
+			name = util.StringToJsonString(name)
 			if utf8.RuneCountInString(name) > 30 {
 				color.Red("30字を超えています。")
 				return
 			}
 			fmt.Println("自己紹介を入力[二回改行で決定][300字]")
 			profile := util.GetText()
+			profile = util.StringToJsonString(profile)
 			if utf8.RuneCountInString(profile) > 300 {
 				color.Red("300字を超えています")
 				return
