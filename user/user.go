@@ -1,7 +1,9 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"unicode/utf8"
@@ -17,6 +19,7 @@ func UserCmd() *cobra.Command {
 		Short: "ユーザーを登録/更新/閲覧します。",
 	}
 	cmd.AddCommand(createCmd())
+	cmd.AddCommand(printAllUserCmd())
 	return cmd
 }
 
@@ -40,6 +43,24 @@ func createCmd() *cobra.Command {
 			resp, _ := http.Post("https://versatileapi.herokuapp.com/api/user/create_user", "text/plain", strings.NewReader(fmt.Sprintf("{\"name\":\"%s\",\"description\":\"%s\"}", name, profile)))
 			defer resp.Body.Close()
 			fmt.Println("完了しました")
+		},
+	}
+	return cmd
+}
+
+func printAllUserCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "list",
+		Short: "すべてのユーザーを表示します",
+		Run: func(cmd *cobra.Command, args []string) {
+			// ユーザー一覧を取得
+			resp, _ := http.Get("https://versatileapi.herokuapp.com/api/user/all")
+			var result []map[string]string
+			body, _ := io.ReadAll(resp.Body)
+			json.Unmarshal([]byte(body), &result)
+			for _, e := range result {
+				fmt.Printf("[%s]%s:%s\n", color.GreenString(e["id"]), color.BlueString(e["name"]), e["description"])
+			}
 		},
 	}
 	return cmd
