@@ -96,7 +96,7 @@ func updateUsers() map[string]string {
 	return users
 }
 
-func ReadUsers() []map[string]string {
+func ReadUsers() map[string]string {
 	file, err := os.Open("user-datas.json")
 	if err != nil {
 		fmt.Println("ユーザーデータが存在しないので、作成します")
@@ -104,7 +104,7 @@ func ReadUsers() []map[string]string {
 	}
 	content, _ := ioutil.ReadAll(file)
 	defer file.Close()
-	var result []map[string]string
+	var result map[string]string
 	json.Unmarshal([]byte(content), &result)
 	return result
 }

@@ -12,6 +12,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/javaboy-github/only-programer-sns-client/util"
+	"github.com/javaboy-github/only-programer-sns-client/user"
 	"github.com/spf13/cobra"
 )
 
@@ -71,16 +72,7 @@ func seeMsgsCmd() *cobra.Command {
 		Short: "すべてのメッセージを表示します",
 		Run: func(cmd *cobra.Command, args []string) {
 			// ユーザーのリストを取得
-			userList := map[string]string{}
-			{
-				resp, _ := http.Get("https://versatileapi.herokuapp.com/api/user/all/")
-				var result []map[string]string
-				body, _ := io.ReadAll(resp.Body)
-				json.Unmarshal([]byte(body), &result)
-				for _, e := range result {
-					userList[e["_user_id"]] = e["name"]
-				}
-			}
+			userList := user.ReadUsers()
 
 			// メッセージ一覧を取得
 			resp, _ := http.Get("https://versatileapi.herokuapp.com/api/text/all")
