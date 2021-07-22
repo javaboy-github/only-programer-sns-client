@@ -95,7 +95,10 @@ func seeMsgsCmd() *cobra.Command {
 				if ok1 && ok2 {
 					// ユーザーとテキストにリプライ
 					// リプライ先のユーザー名とリプライ先のテキストのユーザー名が同じ場合
-					if texts[replayToText][0] == replayToUser {
+					val, err :=texts[replayToText]
+					if !err {
+						reply = "不明>"
+					} else if val[0] == replayToUser {
 						reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[replayToUser]), texts[replayToText][1])
 					} else {
 						// ただの地獄
