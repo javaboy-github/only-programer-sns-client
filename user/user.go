@@ -84,7 +84,7 @@ func updateUsers() map[string]string {
 			}
 		}
 	}
-	file, err := os.OpenFile("user-datas.json", os.O_WRONLY|os.O_CREATE, 777)
+	file, err := os.OpenFile("user-datas.json", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		color.Red("キャッシュファイルの作成に失敗!")
 		os.Exit(1)
