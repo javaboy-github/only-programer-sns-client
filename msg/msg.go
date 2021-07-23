@@ -158,7 +158,11 @@ func seeMsgsCmd() *cobra.Command {
 					reply = fmt.Sprintf("%s>", color.BlueString("@"+userList[replayToUser]))
 				} else if ok1 {
 					// テキストのみにリプライ
-					reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[texts[replayToText][0]]), texts[replayToText][1])
+					val, ok := texts[replayToText]
+					if !ok {
+						val = []string{"不明", "不明"}
+					}
+					reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[val[0]]), val[1])
 				}
 				fmt.Printf("%s[#%s][%s] %s\n", color.BlueString(userList[e["_user_id"]]), color.GreenString(e["text_id"]), color.YellowString(e["_created_at"]), reply)
 				fmt.Println(e["text"])
