@@ -21,16 +21,36 @@ func MsgCmd() *cobra.Command {
 		Use:   "msg",
 		Short: "メッセージを送信/閲覧/返信します。",
 	}
-	cmd.AddCommand(sendMsg())
+	cmd.AddCommand(sendMsgCmd())
 	cmd.AddCommand(seeMsgsCmd())
+	cmd.AddCommand(replyCmd())
 	return cmd
 }
 
-func sendMsg() *cobra.Command {
-	cmd := &cobra.Command{
+// メッセージを送信する
+// @param text 送信するコンテンツ
+// @param replayToText リプライ先のテキストID。ない場合はnull文字列
+// @param replayToUser リプライ先のユーザーID。ない場合はnull文字列
+func sendMsg(text string, replyToText string, replyToUser string) {
+	data := map[string]string{"text": text}
+	if replyToText != "" {
+		data["in_reply_to_text_id"] = replyToText
+	}
+	if replyToUser != "" {
+		data["in_reply_to_user_id"] = replyToUser
+	}
+	// data := fmt.Sprintf("{\"text\":\"%s\"}", text)
+	jsonData, _:= json.Marshal(data)
+	req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte(jsonData)))
+	req.Header.Set("Authorization", "HelloWorld")
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+}
+func sendMsgCmd() *cobra.Command { cmd := &cobra.Command{
 		Use:   "send msg",
 		Short: "メセージを送信します。",
-		Long:  "メッセージを送信します。第一引数にreply先のIDを入れることも可能です",
+		Long:  "メッセージを送信します。",
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Println("メッセージを入力[二回連続で改行で送信][280B]")
 			// テキストを取得
@@ -44,22 +64,8 @@ func sendMsg() *cobra.Command {
 			} else {
 				fmt.Println("送信します")
 				// メッセージを送信
-				var data string
-				if len(args) == 0 {
-					data = fmt.Sprintf("{\"text\":\"%s\"}", msg)
-				} else {
-					data = fmt.Sprintf("{\"text\":\"%s\",\"in_reply_to_text_id\":\"%s\"}", msg, args[0])
-				}
-				req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte(data)))
-				req.Header.Set("Authorization", "HelloWorld")
-				client := &http.Client{}
-				resp, err := client.Do(req)
-				if err != nil {
-					color.Red("エラーが発生しました")
-				} else {
-					fmt.Println("送信が完了しました！")
-				}
-				defer resp.Body.Close()
+				sendMsg(msg, "", "")
+				fmt.Println("送信が完了しました！")
 			}
 		},
 	}
@@ -116,5 +122,56 @@ func seeMsgsCmd() *cobra.Command {
 			}
 		},
 	}
+	return cmd
+}
+
+func replyCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "reply",
+		Short: "リプライします。",
+		Run: func(cmd *cobra.Command, args []string) {
+			name, _ := cmd.Flags().GetString("name")
+			text, _ := cmd.Flags().GetString("text")
+			if name != "" && len(name) != 40 {
+				// 名前がIDでないとき
+				// 名前を適切に入れる
+				users := user.ReadUsers()
+				for id, user := range users {
+					if user == name {
+						name = id
+						break
+					}
+				}
+				// IDが入らなかった場合
+				if len(name) != 40 {
+					color.Red("ユーザーを見つけられません！")
+					os.Exit(0)
+				}
+			}
+			if text != "" && len(text) != 40 {
+				// テキストがIDでないとき
+				fmt.Println("No implemented")
+				os.Exit(1)
+			}
+
+			cmd.Println("メッセージを入力[二回連続で改行で送信][280B]")
+			// テキストを取得
+			msg := util.GetText()
+			msg = util.StringToJsonString(msg)
+
+			// 280字以内でないと送信できない
+			if utf8.RuneCountInString(msg) > 280 {
+				color.Red("280Bを超えています！送信不可")
+				os.Exit(1)
+			} else {
+				fmt.Println("送信します")
+				// メッセージを送信
+				sendMsg(msg, text, name)
+				fmt.Println("送信が完了しました！")
+			}
+		},
+	}
+	cmd.Flags().StringP("name","n", "", "リプレイ先の名前。idでも、ユーザー名でも可")
+	cmd.Flags().StringP("text","t", "", "リプレイ先のテキスト。idでも、テキストIDでも可")
 	return cmd
 }
