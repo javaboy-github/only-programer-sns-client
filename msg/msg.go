@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 	"unicode/utf8"
 
 	"github.com/fatih/color"
@@ -133,7 +134,7 @@ func seeMsgsCmd() *cobra.Command {
 
 			for _, e := range result {
 				if _, ok := userList[e["_user_id"]]; !ok {
-					userList[e["_user_id"]] = "匿名" + strconv.Itoa(n)
+					userList[e["_user_id"]] = "不明" + strconv.Itoa(n)
 					n++
 				}
 				texts[e["id"]] = []string{e["_user_id"], e["text"]}
@@ -164,7 +165,8 @@ func seeMsgsCmd() *cobra.Command {
 					}
 					reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[val[0]]), val[1])
 				}
-				fmt.Printf("%s[#%s][%s] %s\n", color.BlueString(userList[e["_user_id"]]), color.GreenString(e["text_id"]), color.YellowString(e["_created_at"]), reply)
+				date, _ := time.Parse("2006-01-02T15:04:05.000+00:00", e["_created_at"])
+				fmt.Printf("%s[#%s][%s] %s\n", color.BlueString(userList[e["_user_id"]]), color.GreenString(e["text_id"]), color.YellowString(date.In(time.FixedZone("Asia/Tokyo", 9*60*60)).Format("2006-01-02 15:04:05")), reply)
 				fmt.Println(e["text"])
 			}
 		},
