@@ -19,6 +19,7 @@ func GetText() string {
 		}
 		result += input + "\n"
 	}
+	result = StringToJsonString(result)
 	return result
 }
 
