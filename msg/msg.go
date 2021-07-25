@@ -267,9 +267,8 @@ func replyCmd() *cobra.Command {
 					color.Red("フラグtextを整数に変換できません！")
 					os.Exit(1)
 				}
-				text = ReadTexts()[i]
+				text = ReadTexts()[i]["id"]
 				// IDが入らなかった場合
-				fmt.Println(text)
 				if len(text) != 36 {
 					color.Red("テキストを見つけられません!")
 					os.Exit(1)
@@ -298,7 +297,7 @@ func replyCmd() *cobra.Command {
 	return cmd
 }
 
-func ReadTexts() []string {
+func ReadTexts() []map[string]string {
 	file, err := os.Open("text-datas.json")
 	if err != nil {
 		fmt.Println("テキストデータが存在しません。msg listで更新してください。")
@@ -306,7 +305,7 @@ func ReadTexts() []string {
 	}
 	content, _ := ioutil.ReadAll(file)
 	defer file.Close()
-	var result []string
+	var result []map[string]string
 	json.Unmarshal([]byte(content), &result)
 	return result
 }
