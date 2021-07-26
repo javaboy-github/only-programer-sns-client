@@ -19,10 +19,8 @@ func GetText() string {
 		}
 		result += input + "\n"
 	}
-	result = StringToJsonString(result)
 	return result
 }
-
 // 文字列をjson文字列へエスケープする
 func StringToJsonString(str string) string {
 	str = strings.Replace(str, "\\", "\\\\", -1)// \　-> \\

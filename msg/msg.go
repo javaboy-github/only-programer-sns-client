@@ -58,7 +58,6 @@ func sendMsgCmd() *cobra.Command {
 			cmd.Println("メッセージを入力[二回連続で改行で送信][280B]")
 			// テキストを取得
 			msg := util.GetText()
-			msg = util.StringToJsonString(msg)
 
 			// 280字以内でないと送信できない
 			if utf8.RuneCountInString(msg) > 280 {
@@ -278,7 +277,6 @@ func replyCmd() *cobra.Command {
 			cmd.Println("メッセージを入力[二回連続で改行で送信][280B]")
 			// テキストを取得
 			msg := util.GetText()
-			msg = util.StringToJsonString(msg)
 
 			// 280字以内でないと送信できない
 			if utf8.RuneCountInString(msg) > 280 {
