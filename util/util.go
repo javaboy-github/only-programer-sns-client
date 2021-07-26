@@ -14,7 +14,7 @@ func GetText() string {
 		sc.Scan()
 		input := sc.Text()
 		if input == "" {
-			result = result[:len(result) -2 ]
+			result = result[:len(result) -1 ]
 			break
 		}
 		result += input + "\n"
