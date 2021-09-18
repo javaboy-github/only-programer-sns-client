@@ -2,18 +2,21 @@ package main
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/javaboy-github/only-programer-sns-client/global"
 	"github.com/javaboy-github/only-programer-sns-client/msg"
 	"github.com/javaboy-github/only-programer-sns-client/user"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "opsc",
-	Short: "Programer only SNS のクライアント。",
+	Use:   global.AppName,
+	Short: global.AppName + ": Programer only SNS のクライアント。",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("使い方が間違ってます。--helpを見てください。")
 	},
+	Version: global.Version,
 }
 
 func main() {

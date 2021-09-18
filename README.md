@@ -1,20 +1,28 @@
 # About
+
 [これ](https://qiita.com/HawkClaws/items/599d7666f55e79ef7f56)のクライアントを作りたい。
-# Run
+
+## Run
+
 ## step 1
-go言語を入れてください。
+
+go 言語を入れてください。
+
 ### Arch Linux
 
-```
-# pacman -S go
+```bash
+sudo pacman -S go
 ```
 
 ### その他
+
 <!-- これはひどいw -->
+
 [公式サイト](https://golang.org/dl/)から落としてください。
 
 ## step 2
-```
+
+```bash
 go get github.com/javaboy-github/only-programer-sns-client
 ```
 

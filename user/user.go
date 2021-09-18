@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -46,7 +47,10 @@ func createCmd() *cobra.Command {
 				color.Red("300字を超えています")
 				return
 			}
-			resp, _ := http.Post("https://versatileapi.herokuapp.com/api/user/create_user", "text/plain", strings.NewReader(fmt.Sprintf("{\"name\":\"%s\",\"description\":\"%s\"}", name, profile)))
+			resp, err := http.Post("https://versatileapi.herokuapp.com/api/user/create_user", "text/plain", strings.NewReader(fmt.Sprintf("{\"name\":\"%s\",\"description\":\"%s\"}", name, profile)))
+			if err != nil {
+				log.Fatal(err)
+			}
 			defer resp.Body.Close()
 			fmt.Println("完了しました")
 		},
@@ -58,9 +62,15 @@ func updateUsers() map[string]string {
 	users := map[string]string{}
 	// ユーザー一覧を取得
 	{
-		resp, _ := http.Get("https://versatileapi.herokuapp.com/api/user/all")
+		resp, err := http.Get("https://versatileapi.herokuapp.com/api/user/all")
+		if err != nil {
+			log.Fatal(err)
+		}
 		defer resp.Body.Close()
-		body, _ := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
 		io.ReadAll(resp.Body)
 		var result []map[string]string
 		json.Unmarshal([]byte(body), &result)
@@ -70,7 +80,10 @@ func updateUsers() map[string]string {
 	}
 	{
 		// メッセージ一覧からユーザーを追加
-		resp, _ := http.Get("https://versatileapi.herokuapp.com/api/text/all")
+		resp, err := http.Get("https://versatileapi.herokuapp.com/api/text/all")
+		if err != nil {
+			log.Fatal(err)
+		}
 		defer resp.Body.Close()
 		body, _ := io.ReadAll(resp.Body)
 		io.ReadAll(resp.Body)
