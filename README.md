@@ -14,13 +14,8 @@ go言語を入れてください。
 [公式サイト](https://golang.org/dl/)から落としてください。
 
 ## step 2
-リポジトリをダウンロードして、goを実行します。
-<!-- 僕はgoの初心者なのでソースが汚いです。覚悟してみてください。-->
-
 ```
-$ git clone https://www.github.com/javaboy-github/only-programer-sns-client.git
-$ cd only-programer-sns-client
-$ go run main.go
+go get github.com/javaboy-github/only-programer-sns-client
 ```
 
 `go build main.go`とかすると実行可能ファイルが手に入るらしいです。

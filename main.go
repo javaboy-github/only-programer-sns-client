@@ -9,7 +9,7 @@ import (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "Programer only SNS client",
+	Use:   "opsc",
 	Short: "Programer only SNS のクライアント。",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("使い方が間違ってます。--helpを見てください。")
