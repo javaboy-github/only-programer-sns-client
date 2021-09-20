@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -42,11 +43,19 @@ func sendMsg(text string, replyToText string, replyToUser string) {
 		data["in_reply_to_user_id"] = replyToUser
 	}
 	// data := fmt.Sprintf("{\"text\":\"%s\"}", text)
-	jsonData, _        := json.Marshal(data)
-	req, _ := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte(jsonData)))
+	jsonData, _ := json.Marshal(data)
+	req, err := http.NewRequest(http.MethodPost, "https://versatileapi.herokuapp.com/api/text", bytes.NewBuffer([]byte(jsonData)))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	req.Header.Set("Authorization", "HelloWorld")
 	client := &http.Client{}
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer resp.Body.Close()
 }
 func sendMsgCmd() *cobra.Command {
@@ -79,9 +88,9 @@ func sendMsgCmd() *cobra.Command {
 func updateMsgs(newData []map[string]string) (int, []map[string]string) {
 	fmt.Println("キャッシュを更新します...")
 	// IDを取り出す
-	ids:= []string{}
+	ids := []string{}
 	for _, e := range newData {
-		ids= append(ids, e["id"])
+		ids = append(ids, e["id"])
 	}
 
 	// キャッシュを読み込む
@@ -94,7 +103,10 @@ func updateMsgs(newData []map[string]string) (int, []map[string]string) {
 
 		cache := []map[string]string{}
 		content, _ := ioutil.ReadAll(cacheFile)
-		json.Unmarshal([]byte(content), cache)
+		err = json.Unmarshal([]byte(content), &cache)
+		if err != nil {
+			log.Fatal(err)
+		}
 		// キャッシュ内を検索し、補完できる場合は補完する。
 		for i, e := range cache {
 			if e["id"] == newData[0]["id"] {
@@ -102,10 +114,10 @@ func updateMsgs(newData []map[string]string) (int, []map[string]string) {
 				// 補完
 				for j, v := range newData {
 					v["number"] = strconv.Itoa(i + j)
-					cache[i + j] = v
+					cache[i+j] = v
 				}
 				// 保存
-				jsonCacheData  , _ := json.Marshal(cache)
+				jsonCacheData, _ := json.Marshal(cache)
 				cacheFile.Write([]byte(jsonCacheData))
 				defer cacheFile.Close()
 				return i, cache
@@ -132,14 +144,15 @@ updateAllData:
 	for i, e := range result {
 		e["number"] = strconv.Itoa(i)
 	}
-	jsonCacheData  , _ := json.Marshal(result)
+	jsonCacheData, _ := json.Marshal(result)
 	file.Write(jsonCacheData)
 	defer file.Close()
-		for i, e := range result {
-			if e["id"] == newData[0]["id"] {
-				return i, result
-}}
-return -1, nil
+	for i, e := range result {
+		if e["id"] == newData[0]["id"] {
+			return i, result
+		}
+	}
+	return -1, nil
 }
 
 func seeMsgsCmd() *cobra.Command {
@@ -163,7 +176,10 @@ func seeMsgsCmd() *cobra.Command {
 			userList := user.ReadUsers()
 
 			// メッセージ一覧を取得
-			resp, _ := http.Get(fmt.Sprintf("https://versatileapi.herokuapp.com/api/text/all?$orderby=_created_at+desc&$skip=%d&$limit=%d", page * limit, limit))
+			resp, err := http.Get(fmt.Sprintf("https://versatileapi.herokuapp.com/api/text/all?$orderby=_created_at+desc&$skip=%d&$limit=%d", page*limit, limit))
+			if err != nil {
+				log.Fatal(err)
+			}
 			defer resp.Body.Close()
 			body, _ := io.ReadAll(resp.Body)
 			var result []map[string]string
@@ -171,7 +187,7 @@ func seeMsgsCmd() *cobra.Command {
 			json.Unmarshal([]byte(body), &result)
 
 			// 順番を戻す
-			for   i := 0; i < len(result)/2; i++ {
+			for i := 0; i < len(result)/2; i++ {
 				result[i], result[len(result)-i-1] = result[len(result)-i-1], result[i]
 			}
 			// キャッシュの更新
@@ -206,10 +222,9 @@ func seeMsgsCmd() *cobra.Command {
 					// リプライ先のユーザー名とリプライ先のテキストのユーザー名が同じ場合
 					val := getElement(replayToText)
 					if val == nil {
-							reply = "不明>"
-					} else
-					if val["_user_id"] == replayToUser {
-						reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[replayToUser]),getElement(replayToText)["text"])
+						reply = "不明>"
+					} else if val["_user_id"] == replayToUser {
+						reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[replayToUser]), getElement(replayToText)["text"])
 					} else {
 						// ただの地獄
 						reply = fmt.Sprintf("%s,%s %s>", color.BlueString("@"+userList[replayToUser]), color.BlueString("@"+userList[getElement(replayToText)["name"]]), getElement(replayToText)["text"])
@@ -222,9 +237,10 @@ func seeMsgsCmd() *cobra.Command {
 					val := getElement(replayToText)
 					if val == nil {
 						reply = "不明 不明>"
-					}else{
-					reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[val["name"]]), val["text"])
-				}}
+					} else {
+						reply = fmt.Sprintf("%s %s>", color.BlueString("@"+userList[val["name"]]), val["text"])
+					}
+				}
 				date, _ := time.Parse("2006-01-02T15:04:05.000+00:00", e["_created_at"])
 				fmt.Printf("%s[#%s][%s] %s\n", color.BlueString(userList[e["_user_id"]]), color.GreenString(e["text_id"]), color.YellowString(date.In(time.FixedZone("Asia/Tokyo", 9*60*60)).Format("2006-01-02 15:04:05")), reply)
 				fmt.Println(e["text"])
